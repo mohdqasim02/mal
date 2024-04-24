@@ -39,6 +39,7 @@ const read_atom = reader => {
   if (+token) return new MalValue(parseInt(token));
   if (token === 'true') return new MalValue(true);
   if (token === 'false') return new MalValue(false);
+  if (token === 'nil') return new MalValue(null);
   if (token.startsWith(':')) return new MalKeyWord(token);
   if (token.startsWith('"') && token.endsWith('"')) {
     const value = token.split('')[1];

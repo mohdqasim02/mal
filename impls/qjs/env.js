@@ -21,6 +21,16 @@ class Env {
     const env = this.find(malSymbol);
     return env.data[malSymbol];
   }
+
+  static create(outer, bindings, exprs) {
+    const env = this(outer);
+
+    bindings.forEach((binding, index) => {
+      env.set(binding, exprs[index]);
+    });
+
+    return env;
+  }
 }
 
 module.exports = { Env };
