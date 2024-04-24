@@ -1,3 +1,5 @@
+const { isEqual } = require("lodash");
+
 class MalValue {
   value;
 
@@ -7,6 +9,15 @@ class MalValue {
 
   toString() {
     return this.value;
+  }
+
+  equals(other) {
+    if (Array.isArray(this.value) && Array.isArray(other.value)) {
+      if (this.value.length != other.value.length) return false
+      return this.value.every((element, index) => element.equals(other.value[index]));
+    }
+
+    return isEqual(this, other);
   }
 }
 

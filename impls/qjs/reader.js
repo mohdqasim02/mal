@@ -36,13 +36,13 @@ const tokenize = (str) => {
 const read_atom = reader => {
   const token = reader.peek();
 
-  if (+token) return new MalValue(parseInt(token));
+  if (token == '0' || +token) return new MalValue(+token);
   if (token === 'true') return new MalValue(true);
   if (token === 'false') return new MalValue(false);
   if (token === 'nil') return new MalValue(null);
   if (token.startsWith(':')) return new MalKeyWord(token);
   if (token.startsWith('"') && token.endsWith('"')) {
-    const value = token.split('')[1];
+    const value = token.split('').slice(1, -1).join("");
     return new MalString(value);
   };
 

@@ -22,13 +22,9 @@ class Env {
     return env.data[malSymbol];
   }
 
-  static create(outer, bindings, exprs) {
-    const env = this(outer);
-
-    bindings.forEach((binding, index) => {
-      env.set(binding, exprs[index]);
-    });
-
+  static create(outer, binds, exprs) {
+    const env = new Env(outer);
+    binds.forEach((bind, index) => env.set(bind, exprs[index]));
     return env;
   }
 }

@@ -4,18 +4,8 @@ const { stdin: input, stdout: output } = require('node:process');
 const { Env } = require('./env');
 const { pr_str } = require('./printer');
 const { read_str } = require('./reader');
-const { MalValue, MalList, MalSymbol, MalVector, MalMap } = require('./types');
-
-const create_env = () => {
-  const env = new Env(null);
-
-  env.set("+", (a, b) => new MalValue(a.value + b.value));
-  env.set("-", (a, b) => new MalValue(a.value - b.value));
-  env.set("*", (a, b) => new MalValue(a.value * b.value));
-  env.set("/", (a, b) => new MalValue(a.value / b.value));
-
-  return env;
-}
+const { MalList, MalSymbol, MalVector, MalMap } = require('./types');
+const { ns } = require('./core');
 
 const eval_ast = (ast, env) => {
   if (ast instanceof MalSymbol) return env.get(ast.value);
@@ -39,13 +29,13 @@ const EVAL = (ast, env) => {
       }
       case "let*": {
         const newEnv = new Env(env);
-        const [, bindings, val] = ast.value;
+        const [, bindings, exprs] = ast.value;
         const keyPairs = _.chunk(bindings.value, 2);
 
         keyPairs.forEach(([key, val]) => {
           newEnv.set(key.value, EVAL(val, newEnv))
         });
-        return EVAL(val, newEnv);
+        return EVAL(exprs, newEnv);
       }
       case "do": {
         const [_, ...list] = ast.value;
@@ -53,9 +43,33 @@ const EVAL = (ast, env) => {
       }
       case "if": {
         const [_, _cond, _if, _else] = ast.value;
-        if (EVAL(_cond, env).value) return EVAL(_if, env);
+        const evaluatedCond = EVAL(_cond, env).value
+
+        if (evaluatedCond === 0 || evaluatedCond === '' || evaluatedCond) return EVAL(_if, env);
         else if (!_else) return "nil";
         else return EVAL(_else, env);
+      }
+      case "fn*": {
+        const [, pairs, val] = ast.value;
+        const bindings = pairs.value;
+        const amPercentIndex = bindings.findIndex(sym => sym.value == '&');
+
+        if (amPercentIndex !== -1) {
+          return (...exprs) => {
+            const newEnv = Env.create(
+              env,
+              [...bindings.slice(0, amPercentIndex), bindings[amPercentIndex + 1]],
+              [...exprs.slice(0, amPercentIndex), new MalList(exprs.slice(amPercentIndex))]
+            );
+
+            return EVAL(val, newEnv);
+          };
+        }
+
+        return (...exprs) => {
+          const newEnv = Env.create(env, bindings, exprs);
+          return EVAL(val, newEnv);
+        };
       }
     }
 
@@ -66,7 +80,7 @@ const EVAL = (ast, env) => {
   return eval_ast(ast, env);
 }
 
-const repl_env = create_env();
+const repl_env = Env.create(null, Object.keys(ns), Object.values(ns));
 const rep = (input) => PRINT(EVAL(READ(input), repl_env));
 const rl = readline.createInterface({ input, output });
 const repl = () => rl.question("user> ", (answer) => {
@@ -78,4 +92,6 @@ const repl = () => rl.question("user> ", (answer) => {
   repl();
 });
 
+rep("(def! not (fn* (a) (if a false true)))");
+console.clear();
 repl();
