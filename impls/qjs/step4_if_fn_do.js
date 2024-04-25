@@ -7,6 +7,62 @@ const { read_str } = require('./reader');
 const { MalList, MalSymbol, MalVector, MalMap } = require('./types');
 const { ns } = require('./core');
 
+
+function handleDo(ast, env) {
+  const [_, ...list] = ast.value;
+  return list.map((x) => EVAL(x, env)).at(-1);
+}
+
+function handleLet(env, ast) {
+  const newEnv = new Env(env);
+  const [, bindings, exprs] = ast.value;
+  const keyPairs = _.chunk(bindings.value, 2);
+
+  keyPairs.forEach(([key, val]) => {
+    newEnv.set(key.value, EVAL(val, newEnv));
+  });
+  return EVAL(exprs, newEnv);
+}
+
+function handleDef(ast, env) {
+  const [_, key, val] = ast.value;
+  env.set(key.value, EVAL(val, env));
+  return env.get(key.value);
+}
+
+function handleIf(ast, env) {
+  const [_, _cond, _if, _else] = ast.value;
+  const evaluatedCond = EVAL(_cond, env).value
+
+  if (evaluatedCond === 0 || evaluatedCond === '' || evaluatedCond) return EVAL(_if, env);
+  else if (!_else) return "nil";
+  else return EVAL(_else, env);
+}
+
+function handlefn(ast, env) {
+  const [, pairs, val] = ast.value;
+  const bindings = pairs.value;
+  const amPercentIndex = bindings.findIndex(sym => sym.value == '&');
+
+  if (amPercentIndex !== -1) {
+    return (...exprs) => {
+      const newEnv = Env.create(
+        env,
+        [...bindings.slice(0, amPercentIndex), bindings[amPercentIndex + 1]],
+        [...exprs.slice(0, amPercentIndex), new MalList(exprs.slice(amPercentIndex))]
+      );
+
+      return EVAL(val, newEnv);
+    };
+  }
+
+  return (...exprs) => {
+    const newEnv = Env.create(env, bindings, exprs);
+    return EVAL(val, newEnv);
+  };
+}
+
+
 const eval_ast = (ast, env) => {
   if (ast instanceof MalSymbol) return env.get(ast.value);
   if (ast instanceof MalList) return new MalList(ast.value.map((child) => EVAL(child, env)));
@@ -22,55 +78,16 @@ const EVAL = (ast, env) => {
   if (ast instanceof MalList && ast.value.length == 0) return ast;
   if (ast instanceof MalList) {
     switch (ast.value[0].value) {
-      case "def!": {
-        const [_, key, val] = ast.value;
-        env.set(key.value, EVAL(val, env));
-        return env.get(key.value);
-      }
-      case "let*": {
-        const newEnv = new Env(env);
-        const [, bindings, exprs] = ast.value;
-        const keyPairs = _.chunk(bindings.value, 2);
-
-        keyPairs.forEach(([key, val]) => {
-          newEnv.set(key.value, EVAL(val, newEnv))
-        });
-        return EVAL(exprs, newEnv);
-      }
-      case "do": {
-        const [_, ...list] = ast.value;
-        return list.map((x) => EVAL(x, env)).at(-1);
-      }
-      case "if": {
-        const [_, _cond, _if, _else] = ast.value;
-        const evaluatedCond = EVAL(_cond, env).value
-
-        if (evaluatedCond === 0 || evaluatedCond === '' || evaluatedCond) return EVAL(_if, env);
-        else if (!_else) return "nil";
-        else return EVAL(_else, env);
-      }
-      case "fn*": {
-        const [, pairs, val] = ast.value;
-        const bindings = pairs.value;
-        const amPercentIndex = bindings.findIndex(sym => sym.value == '&');
-
-        if (amPercentIndex !== -1) {
-          return (...exprs) => {
-            const newEnv = Env.create(
-              env,
-              [...bindings.slice(0, amPercentIndex), bindings[amPercentIndex + 1]],
-              [...exprs.slice(0, amPercentIndex), new MalList(exprs.slice(amPercentIndex))]
-            );
-
-            return EVAL(val, newEnv);
-          };
-        }
-
-        return (...exprs) => {
-          const newEnv = Env.create(env, bindings, exprs);
-          return EVAL(val, newEnv);
-        };
-      }
+      case "def!":
+        return handleDef(ast, env);
+      case "let*":
+        return handleLet(env, ast);
+      case "do":
+        return handleDo(ast, env);
+      case "if":
+        return handleIf(ast, env);
+      case "fn*":
+        return handlefn(ast, env);
     }
 
     const [fn, ...args] = eval_ast(ast, env).value;
