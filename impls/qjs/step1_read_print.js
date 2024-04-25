@@ -11,7 +11,7 @@ const rep = (input) => PRINT(EVAL(READ(input)));
 const rl = readline.createInterface({ input, output });
 const repl = () => rl.question("user> ", (answer) => {
   try {
-    rep(answer);
+    console.log(rep(answer));
   } catch (e) {
     console.log(e);
   }

@@ -21,53 +21,29 @@ class MalValue {
   }
 }
 
-class MalSymbol extends MalValue {
-  constructor(value) {
-    super(value);
-  }
-}
+class MalSymbol extends MalValue { }
 
-class MalKeyWord extends MalValue {
-  constructor(value) {
-    super(value);
-  }
-}
+class MalKeyWord extends MalValue { }
 
 class MalString extends MalValue {
-  constructor(value) {
-    super(value);
-  }
-
   toString() {
     return '"' + this.value + '"';
   }
 }
 
 class MalList extends MalValue {
-  constructor(value) {
-    super(value);
-  }
-
   toString() {
     return "(" + this.value.join(" ") + ")";
   }
 }
 
 class MalVector extends MalValue {
-  constructor(value) {
-    super(value);
-  }
-
   toString() {
     return "[" + this.value.join(" ") + "]";
   }
 }
 
 class MalMap extends MalValue {
-  constructor(value) {
-    super(value);
-  }
-
   toString() {
     return "{" + this.value.join(" ") + "}";
   }

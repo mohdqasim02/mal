@@ -3,7 +3,7 @@ const { MalValue, MalList } = require("./types");
 
 const printAndReturn = (str, readability, returnValue) => {
   if (returnValue) {
-    pr_str(str, readability);
+    console.log(pr_str(str, readability));
     return returnValue;
   }
 
