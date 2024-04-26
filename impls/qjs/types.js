@@ -49,6 +49,23 @@ class MalMap extends MalValue {
   }
 }
 
+class MalFunction extends MalValue {
+  env;
+  body;
+  params;
+
+  constructor(params, body, env) {
+    super();
+    this.env = env;
+    this.body = body;
+    this.params = params;
+  }
+
+  toString() {
+    return "#<function>";
+  }
+}
+
 module.exports = {
   MalList,
   MalSymbol,
@@ -56,5 +73,6 @@ module.exports = {
   MalVector,
   MalMap,
   MalString,
-  MalKeyWord
+  MalKeyWord,
+  MalFunction
 };
