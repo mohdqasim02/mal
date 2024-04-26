@@ -1,3 +1,5 @@
+const { MalList } = require("./types");
+
 class Env {
   data;
   outer;
@@ -23,9 +25,18 @@ class Env {
   }
 
   static create(outer, binds, exprs) {
-    const env = new Env(outer);
-    binds.forEach((bind, index) => env.set(bind, exprs[index]));
-    return env;
+    const newEnv = new Env(outer);
+
+    for (let i = 0; i < binds.length; i++) {
+      const b = binds[i];
+      if (b.value === "&" && binds[i + 1]) {
+        newEnv.set(binds[i + 1], new MalList(exprs.slice(i)));
+        break;
+      }
+      newEnv.set(b, exprs[i]);
+    }
+
+    return newEnv;
   }
 }
 

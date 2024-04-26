@@ -40,24 +40,10 @@ function handleIf(ast, env) {
 }
 
 function handlefn(ast, env) {
-  const [, pairs, val] = ast.value;
-  const bindings = pairs.value;
-  const amPercentIndex = bindings.findIndex(sym => sym.value == '&');
-
-  if (amPercentIndex !== -1) {
-    return (...exprs) => {
-      const newEnv = Env.create(
-        env,
-        [...bindings.slice(0, amPercentIndex), bindings[amPercentIndex + 1]],
-        [...exprs.slice(0, amPercentIndex), new MalList(exprs.slice(amPercentIndex))]
-      );
-
-      return EVAL(val, newEnv);
-    };
-  }
+  const [, bindings, val] = ast.value;
 
   return (...exprs) => {
-    const newEnv = Env.create(env, bindings, exprs);
+    const newEnv = Env.create(env, bindings.value, exprs);
     return EVAL(val, newEnv);
   };
 }
