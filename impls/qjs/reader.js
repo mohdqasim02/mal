@@ -52,41 +52,21 @@ const read_atom = reader => {
   return new MalSymbol(token);
 }
 
-const read_map = reader => {
-  const list = [];
+const read_collection = (reader, closingBracket) => {
+  const ast = [];
 
   while (reader.peek() !== undefined) {
     if (reader.next() === undefined) throw "Unbalanced String";
-    if (reader.peek() === '}') return new MalMap(list);
-    list.push(read_form(reader));
+    if (reader.peek() === closingBracket) return ast;
+    ast.push(read_form(reader));
   }
 
-  return new MalMap(list);
+  return ast;
 }
 
-const read_vector = reader => {
-  const list = [];
-
-  while (reader.peek() !== undefined) {
-    if (reader.next() === undefined) throw "Unbalanced String";
-    if (reader.peek() === ']') return new MalVector(list);
-    list.push(read_form(reader));
-  }
-
-  return new MalVector(list);
-}
-
-const read_list = reader => {
-  const list = [];
-
-  while (reader.peek() !== undefined) {
-    if (reader.next() === undefined) throw "Unbalanced String";
-    if (reader.peek() === ')') return new MalList(list);
-    list.push(read_form(reader));
-  }
-
-  return new MalList(list);
-}
+const read_map = reader => new MalMap(read_collection(reader, "}"));
+const read_list = reader => new MalList(read_collection(reader, ")"));
+const read_vector = reader => new MalVector(read_collection(reader, "]"));
 
 const read_form = (reader) => {
   const firstToken = reader.peek();

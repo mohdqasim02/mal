@@ -21,10 +21,6 @@ class MalValue {
   }
 }
 
-class MalSymbol extends MalValue { }
-
-class MalKeyWord extends MalValue { }
-
 class MalString extends MalValue {
   toString(readably) {
     if (readably) {
@@ -38,31 +34,49 @@ class MalString extends MalValue {
   }
 }
 
-class MalList extends MalValue {
+class MalCollection extends MalValue {
+  openBracket;
+  closeBracket;
+
+  constructor(value, brackets) {
+    super(value);
+    [this.openBracket, this.closeBracket] = brackets;
+  }
+
   toString(readably) {
-    return "(" + this.value.map(x => x.toString(readably)).join(" ") + ")";
+    return this.openBracket
+      + this.value.map(x => x.toString(readably)).join(" ")
+      + this.closeBracket;
   }
 }
 
-class MalVector extends MalValue {
-  toString(readably) {
-    return "[" + this.value.map(x => x.toString(readably)).join(" ") + "]";
+class MalSymbol extends MalValue { }
+class MalKeyWord extends MalValue { }
+
+class MalList extends MalCollection {
+  constructor(value) {
+    super(value, ["(", ")"]);
   }
 }
 
-class MalMap extends MalValue {
-  toString(readably) {
-    return "{" + this.value.map(x => x.toString(readably)).join(" ") + "}";
+class MalVector extends MalCollection {
+  constructor(value) {
+    super(value, ["[", "]"]);
   }
 }
 
-class MalFunction extends MalValue {
+class MalMap extends MalCollection {
+  constructor(value) {
+    super(value, ["{", "}"]);
+  }
+}
+
+class MalFunction {
   env;
   body;
   params;
 
   constructor(params, body, env) {
-    super();
     this.env = env;
     this.body = body;
     this.params = params;

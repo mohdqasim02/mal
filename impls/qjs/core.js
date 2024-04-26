@@ -1,10 +1,9 @@
 const { pr_str } = require("./printer");
 const { MalValue, MalList, MalString } = require("./types");
 
-const printAndReturn = (args, separator, readably) => {
+const print = (args, separator, readably) => {
   const str = args.map(x => pr_str(x, readably)).join(separator);
   console.log(str);
-  return true;
 }
 
 const ns = {
@@ -23,8 +22,8 @@ const ns = {
   "count": (args) => new MalValue((args.value || []).length),
   "str": (...args) => new MalString(args.map(x => pr_str(x, false)).join("")),
   "pr-str": (...args) => new MalString(args.map(x => pr_str(x, true)).join(" ")),
-  "prn": (...args) => printAndReturn(args, " ", true) && new MalValue(null),
-  "println": (...args) => printAndReturn(args, " ", false) && new MalValue(null),
+  "prn": (...args) => print(args, " ", true) || new MalValue(null),
+  "println": (...args) => print(args, " ", false) || new MalValue(null),
 }
 
 module.exports = { ns };
