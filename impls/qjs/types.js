@@ -7,7 +7,7 @@ class MalValue {
     this.value = value
   }
 
-  toString() {
+  toString(readably) {
     return this.value;
   }
 
@@ -26,26 +26,33 @@ class MalSymbol extends MalValue { }
 class MalKeyWord extends MalValue { }
 
 class MalString extends MalValue {
-  toString() {
-    return '"' + this.value + '"';
+  toString(readably) {
+    if (readably) {
+      return '"' + this.value
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, "\\n") + '"'
+    }
+
+    return this.value;
   }
 }
 
 class MalList extends MalValue {
-  toString() {
-    return "(" + this.value.join(" ") + ")";
+  toString(readably) {
+    return "(" + this.value.map(x => x.toString(readably)).join(" ") + ")";
   }
 }
 
 class MalVector extends MalValue {
-  toString() {
-    return "[" + this.value.join(" ") + "]";
+  toString(readably) {
+    return "[" + this.value.map(x => x.toString(readably)).join(" ") + "]";
   }
 }
 
 class MalMap extends MalValue {
-  toString() {
-    return "{" + this.value.join(" ") + "}";
+  toString(readably) {
+    return "{" + this.value.map(x => x.toString(readably)).join(" ") + "}";
   }
 }
 
@@ -61,7 +68,7 @@ class MalFunction extends MalValue {
     this.params = params;
   }
 
-  toString() {
+  toString(readably) {
     return "#<function>";
   }
 }

@@ -5,7 +5,7 @@ const { pr_str } = require('./printer');
 
 const READ = (str) => read_str(str);
 const EVAL = (str) => str;
-const PRINT = (str) => pr_str(str);
+const PRINT = (str) => pr_str(str, true);
 const rep = (input) => PRINT(EVAL(READ(input)));
 
 const rl = readline.createInterface({ input, output });

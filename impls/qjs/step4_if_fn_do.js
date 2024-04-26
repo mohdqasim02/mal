@@ -59,7 +59,7 @@ const eval_ast = (ast, env) => {
 }
 
 const READ = (str) => read_str(str);
-const PRINT = (ast) => pr_str(ast);
+const PRINT = (ast) => pr_str(ast, true);
 const EVAL = (ast, env) => {
   if (ast instanceof MalList && ast.value.length == 0) return ast;
   if (ast instanceof MalList) {

@@ -1,7 +1,7 @@
-const pr_str = (ast, readability = true) => {
+const pr_str = (ast, readably = false) => {
   if (ast.value === null) return "nil";
 
-  return ast.toString();
+  return ast.toString(readably);
 };
 
 module.exports = { pr_str };
