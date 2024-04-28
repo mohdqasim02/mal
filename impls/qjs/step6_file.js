@@ -42,9 +42,14 @@ function handleIf(ast, env) {
 }
 
 function handlefn(ast, env) {
-  return new MalFunction(ast.value[1], ast.value[2], env);
-}
+  const [, bindings, val] = ast.value;
+  const jsfn = (...exprs) => {
+    const newEnv = Env.create(env, bindings.value, exprs);
+    return EVAL(val, newEnv);
+  };
 
+  return new MalFunction(bindings, val, env, jsfn);
+}
 
 const eval_ast = (ast, env) => {
   if (ast instanceof MalSymbol) return env.get(ast.value);
