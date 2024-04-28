@@ -71,6 +71,20 @@ class MalMap extends MalCollection {
   }
 }
 
+class MalNil extends MalValue {
+  constructor() {
+    super(null)
+  }
+
+  equals(other) {
+    return other instanceof MalNil;
+  }
+
+  toString(readably) {
+    return "nil";
+  }
+}
+
 class MalFunction {
   env;
   body;
@@ -95,5 +109,6 @@ module.exports = {
   MalMap,
   MalString,
   MalKeyWord,
-  MalFunction
+  MalFunction,
+  MalNil
 };

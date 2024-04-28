@@ -1,5 +1,7 @@
+const { readFileSync } = require("node:fs");
 const { pr_str } = require("./printer");
-const { MalValue, MalList, MalString } = require("./types");
+const { read_str } = require("./reader");
+const { MalValue, MalList, MalString, MalNil } = require("./types");
 
 const print = (args, separator, readably) => {
   const str = args.map(x => pr_str(x, readably)).join(separator);
@@ -22,8 +24,10 @@ const ns = {
   "count": (args) => new MalValue((args.value || []).length),
   "str": (...args) => new MalString(args.map(x => pr_str(x, false)).join("")),
   "pr-str": (...args) => new MalString(args.map(x => pr_str(x, true)).join(" ")),
-  "prn": (...args) => print(args, " ", true) || new MalValue(null),
-  "println": (...args) => print(args, " ", false) || new MalValue(null),
+  "prn": (...args) => print(args, " ", true) || new MalNil(),
+  "println": (...args) => print(args, " ", false) || new MalNil(),
+  "read-string": malString => read_str(malString.value),
+  "slurp": filename => new MalString(readFileSync(filename.value, 'utf-8'))
 }
 
 module.exports = { ns };

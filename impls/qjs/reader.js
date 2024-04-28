@@ -5,7 +5,8 @@ const {
   MalVector,
   MalMap,
   MalString,
-  MalKeyWord
+  MalKeyWord,
+  MalNil
 } = require("./types");
 
 class Reader {
@@ -39,7 +40,7 @@ const read_atom = reader => {
   if (token == '0' || +token) return new MalValue(+token);
   if (token === 'true') return new MalValue(true);
   if (token === 'false') return new MalValue(false);
-  if (token === 'nil') return new MalValue(null);
+  if (token === 'nil') return new MalNil();
   if (token.startsWith(':')) return new MalKeyWord(token);
   if (token.match(/^"(?:\\.|[^\\"])*"$/)) {
     const value = token
